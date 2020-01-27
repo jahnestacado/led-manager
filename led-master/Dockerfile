@@ -1,4 +1,4 @@
-FROM golang:1.7.3 AS build
+FROM golang AS build
 WORKDIR /go/src/led-master
 COPY main.go app.go
 RUN go get .

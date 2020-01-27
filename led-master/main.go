@@ -315,7 +315,7 @@ func main() {
 		}
 
 		return true
-	}, 20*time.Second)
+	}, 1*time.Minute)
 
 	blockForever()
 }
