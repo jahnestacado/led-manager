@@ -302,7 +302,6 @@ func mapNumberToLEDState(i int) (string, int) {
 func main() {
 
 	for {
-		fmt.Println(commandInterval)
 		data := patterns[generateRandomPatternNum(len(patterns))]
 		len := len(data) - 1
 
@@ -314,11 +313,14 @@ func main() {
 				color, state := mapNumberToLEDState(numericalState)
 				if i == 0 || data[i-1].Sequence[n] != numericalState {
 					resp, err := http.Get(fmt.Sprintf("http://minion-%d:3333/%s/%d", n, color, state))
-					resp.Body.Close()
-					resp.Close = true
+
 					if err != nil {
 						fmt.Println(err)
+						break
 					}
+
+					resp.Body.Close()
+					resp.Close = true
 				}
 			}
 			time.Sleep(entry.Duration)
