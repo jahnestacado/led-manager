@@ -5,8 +5,6 @@ import (
 	"math/rand"
 	"net/http"
 	"time"
-
-	"github.com/jahnestacado/cable"
 )
 
 type action struct {
@@ -261,11 +259,6 @@ var (
 	}
 )
 
-func handler(w http.ResponseWriter, r *http.Request) {
-
-	fmt.Fprintf(w, "OK")
-}
-
 func generateRandomPatternNum(max int) int {
 	source := rand.NewSource(time.Now().UnixNano())
 	random := rand.New(source)
@@ -290,13 +283,12 @@ func mapNumberToLEDState(i int) (string, int) {
 
 func main() {
 
-	cable.SetInterval(func() bool {
+	for {
 		data := patterns[generateRandomPatternNum(len(patterns))]
 		len := len(data) - 1
 
 		for i := 0; i <= len; i++ {
 			entry := data[i]
-
 			sequence := entry.Sequence
 
 			for n, numericalState := range sequence {
@@ -314,12 +306,7 @@ func main() {
 
 		}
 
-		return true
-	}, 1*time.Minute)
+		time.Sleep(1 * time.Second)
+	}
 
-	blockForever()
-}
-
-func blockForever() {
-	select {}
 }
