@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"os"
+	"strconv"
 	"time"
 )
 
@@ -13,7 +15,8 @@ type action struct {
 }
 
 var (
-	pattern0 = []action{
+	commandInterval = getCommandInterval()
+	pattern0        = []action{
 		action{[]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 100 * time.Millisecond},
 		action{[]int{0, 0, 0, 0, 1, 2, 0, 0, 0, 0}, 100 * time.Millisecond},
 		action{[]int{0, 0, 0, 1, 1, 2, 2, 0, 0, 0}, 80 * time.Millisecond},
@@ -259,6 +262,21 @@ var (
 	}
 )
 
+func getCommandInterval() time.Duration {
+	interval := 1 * time.Minute
+	value := os.Getenv("COMMAND_INTERVAL")
+	if value != "" {
+		numOfMinutes, err := strconv.Atoi(value)
+		if err != nil {
+			fmt.Println(err)
+			return interval
+		}
+		interval = time.Duration(numOfMinutes) * time.Minute
+	}
+
+	return interval
+}
+
 func generateRandomPatternNum(max int) int {
 	source := rand.NewSource(time.Now().UnixNano())
 	random := rand.New(source)
@@ -284,6 +302,7 @@ func mapNumberToLEDState(i int) (string, int) {
 func main() {
 
 	for {
+		fmt.Println(commandInterval)
 		data := patterns[generateRandomPatternNum(len(patterns))]
 		len := len(data) - 1
 
@@ -306,7 +325,7 @@ func main() {
 
 		}
 
-		time.Sleep(1 * time.Second)
+		time.Sleep(commandInterval)
 	}
 
 }
