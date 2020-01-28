@@ -14,6 +14,7 @@ var (
 	redLedCommand   = "status/brightness"
 	greenLedCommand = "pwr/brightness"
 	colors          = []string{"green", "red"}
+	defaultPort     = "3333"
 )
 
 func resetState(color string) error {
@@ -92,6 +93,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	port := os.Getenv("LISTEN_PORT")
+	if port == "" {
+		port = defaultPort
+	}
 	http.HandleFunc("/", handler)
-	log.Fatal(http.ListenAndServe(":3334", nil))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
 }

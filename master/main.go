@@ -282,6 +282,7 @@ func generateRandomPatternNum(max int) int {
 	random := rand.New(source)
 	return random.Intn(max)
 }
+
 func mapNumberToLEDState(i int) (string, int) {
 	switch i {
 	case 1:
