@@ -1,6 +1,6 @@
 FROM golang AS build
 WORKDIR /go/src/led-master
-COPY main.go app.go
+COPY . .
 RUN go build -o app .
 
 
