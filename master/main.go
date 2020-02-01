@@ -2,10 +2,7 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
 	"net/http"
-	"os"
-	"strconv"
 	"time"
 )
 
@@ -15,297 +12,36 @@ type action struct {
 }
 
 var (
-	commandInterval = getCommandInterval()
-	pattern0        = []action{
-		action{[]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 100 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 1, 2, 0, 0, 0, 0}, 100 * time.Millisecond},
-		action{[]int{0, 0, 0, 1, 1, 2, 2, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 1, 1, 1, 2, 2, 2, 0, 0}, 50 * time.Millisecond},
-		action{[]int{0, 1, 1, 1, 1, 2, 2, 2, 2, 0}, 50 * time.Millisecond},
-		action{[]int{1, 1, 1, 1, 1, 2, 2, 2, 2, 2}, 50 * time.Millisecond},
-		action{[]int{0, 1, 1, 1, 1, 2, 2, 2, 2, 0}, 50 * time.Millisecond},
-		action{[]int{0, 0, 1, 1, 1, 2, 2, 2, 0, 0}, 50 * time.Millisecond},
-		action{[]int{0, 0, 0, 1, 1, 2, 2, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 1, 2, 0, 0, 0, 0}, 100 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 100 * time.Millisecond},
-
-		action{[]int{0, 0, 0, 0, 1, 2, 0, 0, 0, 0}, 100 * time.Millisecond},
-		action{[]int{0, 0, 0, 1, 1, 2, 2, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 1, 1, 1, 2, 2, 2, 0, 0}, 50 * time.Millisecond},
-		action{[]int{0, 1, 1, 1, 1, 2, 2, 2, 2, 0}, 50 * time.Millisecond},
-		action{[]int{1, 1, 1, 1, 1, 2, 2, 2, 2, 2}, 50 * time.Millisecond},
-		action{[]int{0, 1, 1, 1, 1, 2, 2, 2, 2, 0}, 50 * time.Millisecond},
-		action{[]int{0, 0, 1, 1, 1, 2, 2, 2, 0, 0}, 50 * time.Millisecond},
-		action{[]int{0, 0, 0, 1, 1, 2, 2, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 1, 2, 0, 0, 0, 0}, 100 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 100 * time.Millisecond},
-
-		action{[]int{0, 0, 0, 0, 1, 2, 0, 0, 0, 0}, 100 * time.Millisecond},
-		action{[]int{0, 0, 0, 1, 1, 2, 2, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 1, 1, 1, 2, 2, 2, 0, 0}, 50 * time.Millisecond},
-		action{[]int{0, 1, 1, 1, 1, 2, 2, 2, 2, 0}, 50 * time.Millisecond},
-		action{[]int{1, 1, 1, 1, 1, 2, 2, 2, 2, 2}, 50 * time.Millisecond},
-		action{[]int{0, 1, 1, 1, 1, 2, 2, 2, 2, 0}, 50 * time.Millisecond},
-		action{[]int{0, 0, 1, 1, 1, 2, 2, 2, 0, 0}, 50 * time.Millisecond},
-		action{[]int{0, 0, 0, 1, 1, 2, 2, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 1, 2, 0, 0, 0, 0}, 100 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 100 * time.Millisecond},
-	}
-	pattern1 = []action{
-		action{[]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{2, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 0, 0, 0, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 2, 0, 0, 0, 0, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 2, 0, 0, 0, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 2, 0, 0, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 2, 0, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 0, 2, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 0, 0, 2, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 0, 0, 0, 2, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 2}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 2}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 1}, 80 * time.Millisecond},
-
-		action{[]int{2, 0, 0, 0, 0, 0, 0, 0, 0, 1}, 80 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 0, 0, 0, 0, 0, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 2, 0, 0, 0, 0, 0, 0, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 2, 0, 0, 0, 0, 0, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 2, 0, 0, 0, 0, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 2, 0, 0, 0, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 0, 2, 0, 0, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 0, 0, 2, 0, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 0, 0, 0, 2, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 0, 0, 0, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 0, 0, 0, 2, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 0, 0, 0, 1, 1}, 80 * time.Millisecond},
-
-		action{[]int{2, 0, 0, 0, 0, 0, 0, 0, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 0, 0, 0, 0, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 2, 0, 0, 0, 0, 0, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 2, 0, 0, 0, 0, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 2, 0, 0, 0, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 2, 0, 0, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 0, 2, 0, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 0, 0, 2, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 0, 0, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 0, 0, 2, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 0, 0, 1, 1, 1}, 80 * time.Millisecond},
-
-		action{[]int{2, 0, 0, 0, 0, 0, 0, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 0, 0, 0, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 2, 0, 0, 0, 0, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 2, 0, 0, 0, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 2, 0, 0, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 2, 0, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 0, 2, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 0, 1, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 0, 2, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 0, 1, 1, 1, 1}, 80 * time.Millisecond},
-
-		action{[]int{2, 0, 0, 0, 0, 0, 1, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 0, 0, 1, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 2, 0, 0, 0, 1, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 2, 0, 0, 1, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 2, 0, 1, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 2, 1, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 1, 1, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 2, 1, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 1, 1, 1, 1, 1}, 80 * time.Millisecond},
-
-		action{[]int{2, 0, 0, 0, 0, 1, 1, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 0, 1, 1, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 2, 0, 0, 1, 1, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 2, 0, 1, 1, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 2, 1, 1, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 1, 1, 1, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 2, 1, 1, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 1, 1, 1, 1, 1, 1}, 80 * time.Millisecond},
-
-		action{[]int{2, 0, 0, 0, 1, 1, 1, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 1, 1, 1, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 2, 0, 1, 1, 1, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 2, 1, 1, 1, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 1, 1, 1, 1, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 2, 1, 1, 1, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 1, 1, 1, 1, 1, 1, 1}, 80 * time.Millisecond},
-
-		action{[]int{2, 0, 0, 1, 1, 1, 1, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 2, 0, 1, 1, 1, 1, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 2, 1, 1, 1, 1, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 1, 1, 1, 1, 1, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 2, 1, 1, 1, 1, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 1, 1, 1, 1, 1, 1, 1, 1}, 80 * time.Millisecond},
-
-		action{[]int{2, 0, 1, 1, 1, 1, 1, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 2, 1, 1, 1, 1, 1, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 1, 1, 1, 1, 1, 1, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 2, 1, 1, 1, 1, 1, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 1, 1, 1, 1, 1, 1, 1, 1, 1}, 80 * time.Millisecond},
-
-		action{[]int{2, 1, 1, 1, 1, 1, 1, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{2, 1, 1, 1, 1, 1, 1, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 300 * time.Millisecond},
-	}
-	pattern2 = []action{
-		action{[]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 100 * time.Millisecond},
-		action{[]int{2, 2, 2, 0, 0, 0, 0, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 2, 2, 2, 0, 0, 0, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 2, 2, 2, 0, 0, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 2, 2, 2, 0, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 2, 2, 2, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 2, 2, 2, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 0, 2, 2, 2, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 0, 0, 2, 2, 2}, 160 * time.Millisecond},
-
-		action{[]int{0, 0, 0, 0, 0, 0, 2, 2, 2, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 2, 2, 2, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 2, 2, 2, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 2, 2, 2, 0, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 2, 2, 2, 0, 0, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 2, 2, 2, 0, 0, 0, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{2, 2, 2, 0, 0, 0, 0, 0, 0, 0}, 160 * time.Millisecond},
-		action{[]int{0, 2, 2, 2, 0, 0, 0, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 2, 2, 2, 0, 0, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 2, 2, 2, 0, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 2, 2, 2, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 2, 2, 2, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 0, 2, 2, 2, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 0, 0, 2, 2, 2}, 160 * time.Millisecond},
-
-		action{[]int{0, 0, 0, 0, 0, 0, 2, 2, 2, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 2, 2, 2, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 2, 2, 2, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 2, 2, 2, 0, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 2, 2, 2, 0, 0, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 2, 2, 2, 0, 0, 0, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{2, 2, 2, 0, 0, 0, 0, 0, 0, 0}, 160 * time.Millisecond},
-		action{[]int{0, 2, 2, 2, 0, 0, 0, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 2, 2, 2, 0, 0, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 2, 2, 2, 0, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 2, 2, 2, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 2, 2, 2, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 0, 2, 2, 2, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 0, 0, 2, 2, 2}, 160 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 0, 2, 2, 2, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 2, 2, 2, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 2, 2, 2, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 2, 2, 2, 0, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 2, 2, 2, 0, 0, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 2, 2, 2, 0, 0, 0, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{2, 2, 2, 0, 0, 0, 0, 0, 0, 0}, 160 * time.Millisecond},
-		action{[]int{0, 2, 2, 2, 0, 0, 0, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 2, 2, 2, 0, 0, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 0, 0, 2, 2, 2, 0, 0, 0, 0}, 300 * time.Millisecond},
-		action{[]int{0, 0, 0, 1, 1, 1, 0, 0, 0, 0}, 300 * time.Millisecond},
-		action{[]int{0, 0, 0, 2, 2, 2, 0, 0, 0, 0}, 300 * time.Millisecond},
-		action{[]int{0, 0, 0, 1, 1, 1, 0, 0, 0, 0}, 300 * time.Millisecond},
-		action{[]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 100 * time.Millisecond},
-	}
-	pattern3 = []action{
-		action{[]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 80 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 0, 0, 0, 0, 2, 0}, 1 * time.Second},
-		action{[]int{0, 2, 1, 0, 0, 0, 0, 0, 2, 0}, 150 * time.Millisecond},
-		action{[]int{0, 2, 0, 1, 0, 0, 0, 0, 2, 0}, 150 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 1, 0, 0, 0, 2, 0}, 150 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 0, 1, 0, 0, 2, 0}, 150 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 0, 0, 1, 0, 2, 0}, 150 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 0, 0, 0, 1, 2, 0}, 150 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 0, 0, 1, 0, 2, 0}, 150 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 0, 1, 0, 0, 2, 0}, 150 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 1, 0, 0, 0, 2, 0}, 150 * time.Millisecond},
-		action{[]int{0, 2, 0, 1, 0, 0, 0, 0, 2, 0}, 150 * time.Millisecond},
-		action{[]int{0, 2, 1, 0, 0, 0, 0, 0, 2, 0}, 150 * time.Millisecond},
-
-		action{[]int{0, 2, 0, 1, 0, 0, 0, 0, 2, 0}, 100 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 1, 0, 0, 0, 2, 0}, 100 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 0, 1, 0, 0, 2, 0}, 100 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 0, 0, 1, 0, 2, 0}, 100 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 0, 0, 0, 1, 2, 0}, 100 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 0, 0, 1, 0, 2, 0}, 100 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 0, 1, 0, 0, 2, 0}, 100 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 1, 0, 0, 0, 2, 0}, 100 * time.Millisecond},
-		action{[]int{0, 2, 0, 1, 0, 0, 0, 0, 2, 0}, 100 * time.Millisecond},
-		action{[]int{0, 2, 1, 0, 0, 0, 0, 0, 2, 0}, 100 * time.Millisecond},
-
-		action{[]int{0, 2, 0, 1, 0, 0, 0, 0, 2, 0}, 80 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 1, 0, 0, 0, 2, 0}, 80 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 0, 1, 0, 0, 2, 0}, 80 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 0, 0, 1, 0, 2, 0}, 80 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 0, 0, 0, 1, 2, 0}, 80 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 0, 0, 1, 0, 2, 0}, 80 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 0, 1, 0, 0, 2, 0}, 80 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 1, 0, 0, 0, 2, 0}, 80 * time.Millisecond},
-		action{[]int{0, 2, 0, 1, 0, 0, 0, 0, 2, 0}, 80 * time.Millisecond},
-		action{[]int{0, 2, 1, 0, 0, 0, 0, 0, 2, 0}, 80 * time.Millisecond},
-
-		action{[]int{0, 2, 0, 1, 0, 0, 0, 0, 2, 0}, 40 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 1, 0, 0, 0, 2, 0}, 40 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 0, 1, 0, 0, 2, 0}, 40 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 0, 0, 1, 0, 2, 0}, 40 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 0, 0, 0, 1, 2, 0}, 40 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 0, 0, 1, 0, 2, 0}, 40 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 0, 1, 0, 0, 2, 0}, 40 * time.Millisecond},
-		action{[]int{0, 2, 0, 0, 1, 0, 0, 0, 2, 0}, 40 * time.Millisecond},
-		action{[]int{0, 2, 0, 1, 0, 0, 0, 0, 2, 0}, 40 * time.Millisecond},
-		action{[]int{0, 2, 1, 0, 0, 0, 0, 0, 2, 0}, 40 * time.Millisecond},
-
-		action{[]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 80 * time.Millisecond},
-	}
-	patterns = [][]action{
-		pattern0,
-		pattern1,
-		pattern2,
-		pattern3,
-	}
+	commandInterval        = time.Duration(getIntEnv("COMMAND_INTERVAL", 1)) * time.Minute
+	rainForecastUrl        = getStrEnv("RAIN_FORECAST_URL", "https://graphdata.buienradar.nl/2.0/forecast/geo/Rain3Hour?lat=52.357&lon=4.94")
+	precipitationThreshold = getFloatEnv("PRECIPITAION_THRESHOLD", 0.5)
+	rainIntesityThreshold  = getIntEnv("INTENSITY_THRESHOLD", 30)
 )
 
-func getCommandInterval() time.Duration {
-	interval := 1 * time.Minute
-	value := os.Getenv("COMMAND_INTERVAL")
-	if value != "" {
-		numOfMinutes, err := strconv.Atoi(value)
-		if err != nil {
-			fmt.Println(err)
-			return interval
-		}
-		interval = time.Duration(numOfMinutes) * time.Minute
-	}
-
-	return interval
+type Forecasts struct {
+	Forecasts []Forecast
 }
 
-func generateRandomPatternNum(max int) int {
-	source := rand.NewSource(time.Now().UnixNano())
-	random := rand.New(source)
-	return random.Intn(max)
-}
-
-func mapNumberToLEDState(i int) (string, int) {
-	switch i {
-	case 1:
-		{
-			return "green", 1
-		}
-	case 2:
-		{
-			return "red", 1
-		}
-	default:
-		{
-			return "green", 0
-		}
-	}
+type Forecast struct {
+	UTCDateTime   string  `json:"utcdatetime"`
+	Precipitation float64 `json:"precipitation"`
+	RainIntensity int     `json:"value"`
 }
 
 func main() {
+	numOfRandomPatterns := len(randomPatterns)
 
 	for {
-		data := patterns[generateRandomPatternNum(len(patterns))]
-		len := len(data) - 1
+		willRain, err := willItRain()
+		if err != nil {
+			fmt.Println(err)
+		}
+		data := rainPattern
+		if !willRain {
+			data = randomPatterns[generateRandomPatternNum(numOfRandomPatterns)]
+		}
 
+		len := len(data) - 1
 		for i := 0; i <= len; i++ {
 			entry := data[i]
 			sequence := entry.Sequence
