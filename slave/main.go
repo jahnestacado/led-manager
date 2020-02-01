@@ -42,6 +42,7 @@ func executeCommand(color, state string) error {
 	ledPath := fmt.Sprintf("%s:%s:%s", ledPath, color, ledCommand)
 	ledFile, err := os.Create(ledPath)
 	if err != nil {
+		fmt.Println("os.Create", err)
 		return err
 	}
 	defer ledFile.Close()
@@ -49,19 +50,9 @@ func executeCommand(color, state string) error {
 	cmd := exec.Command("echo", state)
 	cmd.Stdout = ledFile
 
-	err = cmd.Start()
-	if err != nil {
-		return err
-	}
-
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-
 	err = cmd.Run()
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("cmd.Run", err)
 		return err
 	}
 
@@ -75,7 +66,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	err := resetState(color)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("resetState", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -84,7 +75,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	r.Close = true
 	r.Header.Set("Connection", "close")
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("executeCommand", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
