@@ -1,0 +1,19 @@
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: led-master
+spec:
+  replicas: 1      
+  selector:
+    matchLabels:
+      app: led-master
+  template:
+    metadata:
+      labels:
+        app: led-master
+    spec:
+      hostNetwork: true      
+      containers:
+      - name: led-master
+        image: jahnestacado/led-master
+

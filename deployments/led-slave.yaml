@@ -1,0 +1,32 @@
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: DaemonSet
+metadata:
+  name: led-slave
+spec:
+  selector:
+    matchLabels:
+      app: led-slave
+  template:
+    metadata:
+      labels:
+        app: led-slave
+    spec:
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master      
+      hostNetwork: true      
+      containers:
+      - name: led-slave
+        image: jahnestacado/led-slave
+        ports:
+        - containerPort: 3333
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - name: led-files
+            mountPath: /sys/class/leds
+      volumes:
+        - name: led-files
+          hostPath:
+            path: /sys/class/leds      
+
